@@ -1,14 +1,20 @@
-from typing import Dict, Union
+from typing import Dict, List, Union
 
 
 class BaseLogger:
 	def log(self, id: str, value: str) -> None:
 		raise NotImplementedError()
 
-	def get(self, id: str) -> None:
+	def set_array(self, id: str) -> None:
 		raise NotImplementedError()
 
-	def get_result_dict(self) -> Dict[str, str]:
+	def add_array_item(self, id: str, value: str) -> None:
+		raise NotImplementedError()
+
+	def get(self, id: str) -> Union[str, List[str], None]:
+		raise NotImplementedError()
+
+	def get_result_dict(self) -> Dict[str, Union[str, List[str]]]:
 		raise NotImplementedError()
 
 	def reset_history(self) -> None:

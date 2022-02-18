@@ -3,16 +3,22 @@ from .base import BaseLogger
 
 
 class DictLogger(BaseLogger):
-	result: Dict[str, str] = dict()
-	history: List[str] = list()
+	result: Dict[str, str] = {}
+	history: List[str] = []
 
 	def log(self, id: str, value: str) -> None:
 		self.result[id] = value
 
-	def get(self, id: str) -> Union[str, None]:
+	def set_array(self, id: str) -> None:
+		self.result[id] = []
+
+	def add_array_item(self, id: str, value: str) -> None:
+		self.result[id].append(value)
+
+	def get(self, id: str) -> Union[str, List[str], None]:
 		return self.result.get(id)
 
-	def get_result_dict(self) -> Dict[str, str]:
+	def get_result_dict(self) -> Dict[str, Union[str, List[str]]]:
 		return self.result
 
 	def reset_history(self) -> None:

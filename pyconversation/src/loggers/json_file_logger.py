@@ -1,7 +1,7 @@
+from typing import Union, List, Dict, Any
 import os
-from typing import Union, Dict, Any
-from io import TextIOWrapper
 import json
+from io import TextIOWrapper
 from .base import BaseLogger
 
 
@@ -29,10 +29,18 @@ class JsonFileLogger(BaseLogger):
 		self.cache["data"][id] = value
 		self._write()
 
-	def get(self, id: str) -> Union[str, None]:
+	def set_array(self, id: str) -> None:
+		self.cache["data"][id] = []
+		self._write()
+
+	def add_array_item(self, id: str, value: str) -> None:
+		self.cache["data"][id].append(value)
+		self._write()
+
+	def get(self, id: str) -> Union[str, List[str], None]:
 		return self.cache["data"].get(id)
 
-	def get_result_dict(self) -> Dict[str, str]:
+	def get_result_dict(self) -> Dict[str, Union[str, List[str]]]:
 		return self.cache["data"]
 
 	def reset_history(self) -> None:

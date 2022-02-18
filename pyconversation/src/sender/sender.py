@@ -10,22 +10,22 @@ class MessageSender:
 	stop_command: Union[str, None]
 	current_message: Union[MessageTransfer, None] = None
 	resent_message: Union[MessageTransfer, None] = None
-	send: Callable[[str], None]
+	base_send: Callable[[str], None]
 	finished: bool = False
 	terminated: bool = False
 
 	def __init__(
 		self,
 		*,
-		headline_text: str,
-		stop_command: str,
+		headline_text: Union[str, None],
+		stop_command: Union[str, None],
 		root: BaseMessage,
 		logger: BaseLogger,
 		send: Callable[[str], None]
 	) -> None:
 		self.logger = logger
 		self.iterator = root.iterator(logger)
-		self.send = send
+		self.base_send = send
 		self.headline = headline_text
 		self.stop_command = stop_command.lower() if stop_command is not None else None 
 
@@ -38,7 +38,7 @@ class MessageSender:
 			self.terminated = True
 
 		if self.resent_message is not None:
-			self.send(self.resent_message.text)
+			self._send(self.resent_message.text)
 			self.resent_message = None
 
 			if not self.current_message.skip:
@@ -47,7 +47,7 @@ class MessageSender:
 		while True:
 			try:
 				self.current_message = self.iterator.send(prev_answer)
-				self.send(self.current_message.text)
+				self._send(self.current_message.text)
 			except StopIteration:
 				self.finished = True
 				break
@@ -62,8 +62,12 @@ class MessageSender:
 		self.logger.finalize()
 
 		return result
+	
+	def _send(self, text: Union[str, None]) -> None:
+		if text is not None:
+			self.base_send(text)
 
-	def _restore(self):
+	def _restore(self) -> None:
 		last_id = self.logger.get_last_id()
 		self.logger.reset_history()
 		answer = None
@@ -83,6 +87,6 @@ class MessageSender:
 
 		self.resent_message = self.current_message
 
-	def _send_headline(self):
+	def _send_headline(self) -> None:
 		if self.headline:
-			self.send(self.headline)
+			self._send(self.headline)
