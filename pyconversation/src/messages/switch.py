@@ -29,9 +29,9 @@ class Switch(BaseMessage):
 	def _base_iterator(self, logger: BaseLogger) -> MessageTransferGenerator:
 		answer = yield MessageTransfer(id=self.id, text=self.text)
 		from_map = self.answer_map.get(answer)
+		logger.log(self.id, answer)
 
 		if from_map:
-			logger.log(self.id, answer)
 			yield from from_map.iterator(logger)
 		else:
 			if self.fallback is not None:

@@ -11,11 +11,14 @@ class BaseLogger:
 	def get_result_dict(self) -> Dict[str, str]:
 		raise NotImplementedError()
 
-	def reset_history(self, id: str) -> None:
+	def reset_history(self) -> None:
 		pass
 
 	def log_last_id(self, id: str) -> None:
 		pass
 
 	def get_last_id(self) -> Union[str, None]:
+		pass
+
+	def finalize(self) -> None:
 		pass

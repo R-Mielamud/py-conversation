@@ -6,7 +6,8 @@ from pyconversation.src.types import MessageTransferGenerator
 class MessageSender:
 	logger: BaseLogger
 	iterator: MessageTransferGenerator
-	current_message: MessageTransfer
+	current_message: Union[MessageTransfer, None] = None
+	resent_message: Union[MessageTransfer, None] = None
 	send: Callable[[str], None]
 	finished: bool = False
 
@@ -17,6 +18,13 @@ class MessageSender:
 		self._restore()
 
 	def send_all_skippable(self, prev_answer: Union[str, None]) -> None:
+		if self.resent_message is not None:
+			self.send(self.resent_message.text)
+			self.resent_message = None
+
+			if not self.current_message.skip:
+				return
+
 		while True:
 			try:
 				self.current_message = self.iterator.send(prev_answer)
@@ -30,18 +38,28 @@ class MessageSender:
 
 	def finalize(self) -> Dict[str, str]:
 		self.iterator.close()
-		return self.logger.get_result_dict()
+
+		result = self.logger.get_result_dict()
+		self.logger.finalize()
+
+		return result
 
 	def _restore(self):
 		last_id = self.logger.get_last_id()
 		self.logger.reset_history()
+		answer = None
 
 		if last_id is not None:
-			while self.current_message is not None and self.current_message.id != last_id:
-				answer = self.logger.get(self.current_message.id)
-
+			while True:
 				try:
 					self.current_message = self.iterator.send(answer)
+
+					if self.current_message is None or self.current_message.id == last_id:
+						break
+
+					answer = self.logger.get(self.current_message.id)
 				except StopIteration:
 					self.finished = True
 					break
+
+		self.resent_message = self.current_message
