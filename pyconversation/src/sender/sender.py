@@ -6,18 +6,37 @@ from pyconversation.src.types import MessageTransferGenerator
 class MessageSender:
 	logger: BaseLogger
 	iterator: MessageTransferGenerator
+	headline: Union[str, None]
+	stop_command: Union[str, None]
 	current_message: Union[MessageTransfer, None] = None
 	resent_message: Union[MessageTransfer, None] = None
 	send: Callable[[str], None]
 	finished: bool = False
+	terminated: bool = False
 
-	def __init__(self, *, root: BaseMessage, logger: BaseLogger, send: Callable[[str], None]) -> None:
+	def __init__(
+		self,
+		*,
+		headline_text: str,
+		stop_command: str,
+		root: BaseMessage,
+		logger: BaseLogger,
+		send: Callable[[str], None]
+	) -> None:
 		self.logger = logger
 		self.iterator = root.iterator(logger)
 		self.send = send
+		self.headline = headline_text
+		self.stop_command = stop_command.lower() if stop_command is not None else None 
+
+		self._send_headline()
 		self._restore()
 
 	def send_all_skippable(self, prev_answer: Union[str, None]) -> None:
+		if prev_answer and prev_answer.lower() == self.stop_command:
+			self.finished = True
+			self.terminated = True
+
 		if self.resent_message is not None:
 			self.send(self.resent_message.text)
 			self.resent_message = None
@@ -63,3 +82,7 @@ class MessageSender:
 					break
 
 		self.resent_message = self.current_message
+
+	def _send_headline(self):
+		if self.headline:
+			self.send(self.headline)
