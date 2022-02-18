@@ -7,3 +7,4 @@ class MessageType(Enum):
 	Ask = "ask"
 	Switch = "switch"
 	List = "list"
+	TerminateGroup = "terminate_group"

@@ -1,7 +1,6 @@
-from typing import Iterator
 from pyconversation.src.enums import MessageType
 from pyconversation.src.loggers import BaseLogger
-from .transfer import MessageTransfer
+from pyconversation.src.types import MessageTransferGenerator
 
 class BaseMessage:
 	id: str
@@ -11,5 +10,5 @@ class BaseMessage:
 		self.id = id
 		self.type = type
 
-	def iterator(self, logger: BaseLogger) -> Iterator[MessageTransfer]:
+	def iterator(self, logger: BaseLogger) -> MessageTransferGenerator:
 		raise NotImplementedError()

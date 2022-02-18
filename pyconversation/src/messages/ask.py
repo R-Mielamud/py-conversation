@@ -5,12 +5,13 @@ from .base import BaseMessage
 from .transfer import MessageTransfer
 
 
-class Text(BaseMessage):
+class Ask(BaseMessage):
 	text: str
 
 	def __init__(self, *, id: str, text: str) -> None:
-		super().__init__(id=id, type=MessageType.Text)
+		super().__init__(id=id, type=MessageType.Ask)
 		self.text = text
 
 	def iterator(self, logger: BaseLogger) -> MessageTransferGenerator:
-		yield MessageTransfer(text=self.text, skip=True)
+		answer = yield MessageTransfer(text=self.text)
+		logger.log(self.id, answer)

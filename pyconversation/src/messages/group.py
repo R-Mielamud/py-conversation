@@ -1,6 +1,7 @@
-from typing import Iterator, List
+from typing import List
 from pyconversation.src.enums import MessageType
 from pyconversation.src.loggers import BaseLogger
+from pyconversation.src.types import MessageTransferGenerator
 from .base import BaseMessage
 from .transfer import MessageTransfer
 
@@ -11,6 +12,23 @@ class Group(BaseMessage):
 		super().__init__(id=id, type=MessageType.Group)
 		self.children = children
 	
-	def iterator(self, logger: BaseLogger) -> Iterator[MessageTransfer]:
+	def iterator(self, logger: BaseLogger) -> MessageTransferGenerator:
 		for child in self.children:
-			yield from child.iterator(logger)
+			iterator = child.iterator(logger)
+			prev_answer = None
+
+			try:
+				while True:
+					message = iterator.send(prev_answer)
+
+					if message.terminate_group:
+						yield MessageTransfer(text=message.text, skip=True)
+						break
+
+					prev_answer = yield message
+				else:
+					continue
+
+				break
+			except StopIteration:
+				pass
