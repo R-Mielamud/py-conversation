@@ -1,5 +1,4 @@
 from typing import Dict, Union
-from pyconversation.src.enums import MessageType
 from pyconversation.src.loggers import BaseLogger
 from pyconversation.src.types import MessageTransferGenerator
 from .base import BaseMessage
@@ -21,7 +20,7 @@ class Switch(BaseMessage):
 		fallback: Union[BaseMessage, None] = None,
 		repeatOnFallback: bool = False
 	) -> None:
-		super().__init__(id=id, type=MessageType.Switch)
+		super().__init__(id=id)
 		self.text = text
 		self.answer_map = answer_map
 		self.fallback = fallback
