@@ -12,6 +12,9 @@ class DictLogger(BaseLogger):
 	def get(self, id: str) -> Union[str, None]:
 		return self.result.get(id)
 
+	def get_result_dict(self) -> Dict[str, str]:
+		return self.result
+
 	def reset_history(self) -> None:
 		self.history.clear()
 

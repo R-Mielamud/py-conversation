@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Dict, Union
 
 
 class BaseLogger:
@@ -6,6 +6,9 @@ class BaseLogger:
 		raise NotImplementedError()
 
 	def get(self, id: str) -> None:
+		raise NotImplementedError()
+
+	def get_result_dict(self) -> Dict[str, str]:
 		raise NotImplementedError()
 
 	def reset_history(self, id: str) -> None:
