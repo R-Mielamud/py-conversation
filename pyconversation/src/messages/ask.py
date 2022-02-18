@@ -11,6 +11,6 @@ class Ask(BaseMessage):
 		super().__init__(id=id)
 		self.text = text
 
-	def iterator(self, logger: BaseLogger) -> MessageTransferGenerator:
-		answer = yield MessageTransfer(text=self.text)
+	def _base_iterator(self, logger: BaseLogger) -> MessageTransferGenerator:
+		answer = yield MessageTransfer(id=self.id, text=self.text)
 		logger.log(self.id, answer)

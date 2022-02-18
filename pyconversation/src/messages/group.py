@@ -11,7 +11,7 @@ class Group(BaseMessage):
 		super().__init__(id=id)
 		self.children = children
 	
-	def iterator(self, logger: BaseLogger) -> MessageTransferGenerator:
+	def _base_iterator(self, logger: BaseLogger) -> MessageTransferGenerator:
 		for child in self.children:
 			iterator = child.iterator(logger)
 			prev_answer = None
@@ -21,7 +21,7 @@ class Group(BaseMessage):
 					message = iterator.send(prev_answer)
 
 					if message.terminate_group:
-						yield MessageTransfer(text=message.text, skip=True)
+						yield MessageTransfer(id=message.id, text=message.text, skip=True)
 						break
 
 					prev_answer = yield message

@@ -11,5 +11,5 @@ class TerminateGroup(BaseMessage):
 		super().__init__(id=id)
 		self.text = text
 
-	def iterator(self, logger: BaseLogger) -> MessageTransferGenerator:
-		yield MessageTransfer(text=self.text, skip=True, terminate_group=True)
+	def _base_iterator(self, logger: BaseLogger) -> MessageTransferGenerator:
+		yield MessageTransfer(id=self.id, text=self.text, skip=True, terminate_group=True)

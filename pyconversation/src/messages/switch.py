@@ -26,8 +26,8 @@ class Switch(BaseMessage):
 		self.fallback = fallback
 		self.repeatOnFallback = repeatOnFallback
 
-	def iterator(self, logger: BaseLogger) -> MessageTransferGenerator:
-		answer = yield MessageTransfer(text=self.text)
+	def _base_iterator(self, logger: BaseLogger) -> MessageTransferGenerator:
+		answer = yield MessageTransfer(id=self.id, text=self.text)
 		logger.log(self.id, answer)
 		from_map = self.answer_map.get(answer)
 
