@@ -2,6 +2,7 @@ from typing import Union
 
 
 class MessageTransfer:
+	id: str
 	text: Union[str, None]
 	skip: bool
 	terminate_group: bool

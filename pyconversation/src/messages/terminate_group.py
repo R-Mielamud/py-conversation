@@ -1,3 +1,4 @@
+from typing import Union
 from pyconversation.src.loggers import BaseLogger
 from pyconversation.src.types import MessageTransferGenerator
 from .base import BaseMessage
@@ -5,11 +6,14 @@ from .transfer import MessageTransfer
 
 
 class TerminateGroup(BaseMessage):
-	text: str
+	child: Union[BaseMessage, None]
 
-	def __init__(self, *, id: str, text: str = "") -> None:
+	def __init__(self, *, id: str, child: Union[BaseMessage, None] = None) -> None:
 		super().__init__(id=id)
-		self.text = text
+		self.child = child
 
 	def _base_iterator(self, logger: BaseLogger) -> MessageTransferGenerator:
-		yield MessageTransfer(id=self.id, text=self.text, skip=True, terminate_group=True)
+		if self.child:
+			yield from self.child.iterator()
+
+		yield MessageTransfer(id=self.id, skip=True, terminate_group=True)
