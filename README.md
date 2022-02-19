@@ -164,9 +164,9 @@ For full message sender documentation <a href="#sender">see Message Sender</a>
 
 ### You've created your first chat-bot with clever conversation! Here quick tutorial ends.
 
-## <a id="#messages"></a>Messages
+## <a id="messages"></a>Messages
 
-### <a id="#text"></a>Text
+### <a id="text"></a>Text
 
 Text message sends some text, which doesn't require user's answer
 
@@ -181,7 +181,7 @@ Usage example:
 Text(id="hello", text="Hello, user!")
 ```
 
-### <a id="#group"></a>Group
+### <a id="group"></a>Group
 
 Group is a message, which doesn't send anything and doesn't require an answer. It's just a container for a list of messages
 
@@ -202,7 +202,7 @@ Group(
 )
 ```
 
-### <a id="#ask"></a>Ask
+### <a id="ask"></a>Ask
 
 Ask message send some text to user and waits for an answer
 
@@ -217,7 +217,7 @@ Usage example:
 Ask(id="name", text="What's your name?")
 ```
 
-### <a id="#switch"></a>Switch
+### <a id="switch"></a>Switch
 
 Switch message asks user a question and sends a message depending on user's answer.
 
@@ -245,7 +245,7 @@ Switch(
 )
 ```
 
-### <a id="#list-ask"></a>ListAsk
+### <a id="list-ask"></a>ListAsk
 
 ListAsk asks user a question and waits for several answers.
 
@@ -269,7 +269,7 @@ ListAsk(
 )
 ```
 
-### <a id="#terminate-group"></a>TerminateGroup
+### <a id="terminate-group"></a>TerminateGroup
 
 TerminateGroup sends another message and then terminates sending group, inside which it is located
 
@@ -301,7 +301,7 @@ Group( # This group's gonna be terminated
 )
 ```
 
-### <a id="#own-messages"></a>Creating Own Messages
+### <a id="own-messages"></a>Creating Own Messages
 
 Every message is a class, so to create your own message, you just need to inherit `BaseMessage` class (It can be imported like this: `from pyconversation import BaseMessage`)
 
@@ -334,19 +334,189 @@ As you can see, each message has an iterator method, which takes logger as a par
 
 But what is that `MessageTransfer` object? It's used to pass string message to sender and get an answer. Details in next article.
 
-### <a id="#message-transfer"></a>MessageTransfer
+### <a id="message-transfer"></a>MessageTransfer
 
 Message transfer is used to pass string message to sender and get an answer. It can be `yield`ed from message's generator.
 
 Constructor parameters:
 
 -   `id` (str) - message's unique id
--   `text` (str) - text, which'll be sent to user
+-   `text` (str?) - text, which'll be sent to user or None, if you don't want to ask any questions, you just need an answer
 -   `skip` (bool?) - if true, this question doesn't need an answer and won't wait for it.
--   `terminate_group` (bool?) - when this is true, group which intercepted such transfer processes it and terminates
+-   `terminate_group` (bool?) - when this is true, group which intercepted such transfer processes it and terminates.
 
 Usage example in upper **Creating Own Messages** section
 
-## <a id="#loggers">Loggers
+## <a id="loggers">Loggers
 
-### <a id="#dict-logger"></a>DictLogger
+Loggers are used to store users' answers and message history.
+
+Message history is a list, where question ids are stored. It's used to restore conversation. For example, if user has already answered several questions and suddenly the server stops, last sent message id will be taken from history, and conversation will begin from the last message.
+
+### <a id="dict-logger"></a>DictLogger
+
+DictLogger stores answers and history in-memory (in a dictionary). So it's just an example to play with the library. Don't use it in production code.
+
+No constructor parameters.
+
+Usage example:
+
+```python
+logger = DictLogger()
+```
+
+### <a id="json-file-logger"></a>JsonFileLogger
+
+JsonFileLogger stores everything in a JSON file. JSON file stays on the computer anyway, so when server suddenly stops and the reboots, your bot'll be able to continue conversation from the right place.
+
+Constructor parameters:
+
+-   `file_path` (str) - JSON file's absolute path. It must be unique between all conversations on this server.
+
+Usage example:
+
+```python
+logger = JsonFileLogger(pathlib.Path(__file__).parent / "conversation.json")
+```
+
+### <a id="own-loggers"></a>Creating Own Loggers
+
+If you need to create your own logger (and you'll need it more often, than creating own messages) you need to inherit the `BaseLogger` class.
+
+It has the following abstract methods:
+
+-   `log` (-> None) - stores answer by message's unique id
+
+    Parameters:
+
+    -   `id` (str) - message unique id
+    -   `value` (str) - answer
+
+-   `set_array` (-> None) - initializes empty list in answer dictionary using message unique id as a key
+
+    Parameters:
+
+    -   `id` (str) - message unique id
+
+-   `add_array_item` (-> None) - add item to existing list using message id as answer dictionary key
+
+    Parameters:
+
+    -   `id` (str) - message unique id
+    -   `value` (str) - value to add to list
+
+-   `get` (-> union\[str, list\[str\], none\]) - get message answer or list of answers by message id if exists
+
+    Parameters:
+
+    -   `id` (str) - message unique id
+
+-   `get_result_dict` (-> dict\[str, union\[str, list\[str\]\]\]) - get full answer dictionary
+
+    No parameters
+
+And also the following virtual methods (not necessary to implement):
+
+-   `reset_history` (-> None) - remove all elements from message history list
+
+    No parameters
+
+-   `log_last_id` (-> None) - add message id to message history list
+
+    Parameters:
+
+    -   `id` (str) - message unique id
+
+-   `get_last_id` (-> str?) - get last sent message id (last element in message history list)
+
+    No parameters
+
+-   `finalize` (-> None) - dispose of logger's resources (open files, socket connections, etc.)
+
+    **Note**: This method is called when the conversation is finished. So, for instance, `JsonFileLogger` deletes it's data file in this method.
+
+    No parameters
+
+Usage example:
+
+```python
+from typing import Union, List, Dict
+from pyconversation import BaseLogger
+
+class MySocketLogger(BaseLogger):
+    socket: Socket
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._connect_socket()
+
+    def log(self, id: str, value: str) -> None:
+        self.socket.emit("SET_OR_REPLACE", {"id": id, "value": value})
+
+    def set_array(self, id: str) -> None:
+        self.socket.emit("SET_OR_REPLACE", {"id": id, "value": []})
+
+    def add_array_item(self, id: str, value: str) -> None:
+        self.socket.emit("ADD_ARRAY_ITEM", {"id": id, "value": value})
+
+    def get(self, id: str) -> Union[str, List[str]]:
+       return self.socket.emit("GET", {"id": id})
+
+    def get_result_dict(self) -> Dict[str, Union[str, List[str]]]:
+        return self.socket.emit("GET_ALL")
+
+    def reset_history(self) -> None:
+        return self.socket.emit("SET_HISTORY", [])
+
+    def log_last_id(self, id: str) -> None:
+        return self.socket.emit("ADD_HISTORY", id)
+
+    def get_last_id(self, id: str) -> None:
+        if not self.socket.emit("HISTORY_EMPTY"):
+            return self.socket.emit("GET_LAST_IN_HISTORY")
+
+    def finalize(self) -> None:
+        self.socket.emit("CLEAR_EVERYTHING")
+        self._disconnect_socket()
+
+    def _connect_socket(self) -> None:
+        self.socket = ... # We'll log our data using a socket
+
+    def _disconnect_socket(self) -> None:
+        self.socket.disconnect()
+        self.socket = None
+```
+
+## <a id="sender"></a>Message Sender
+
+Message sender is used to simplify conversation restoring and message sending.
+
+Constructor parameters:
+
+-   `root` (message) - root message (aka message schema)
+-   `logger` (logger) - logger
+-   `send` (function (str) -> None) - send function (takes string and sends it to user)
+-   `headline_text` (str?) - text, which'll be sent to user whent message sender is constructed. Whether conversation is constructed or restored, it's sent anyway.
+-   `stop_command` (str?) - if user sends this as an answer, conversation terminates.
+
+Exposed properties:
+
+-   `finished` (bool) - is conversation finished (true if all messages have been sent or conversation has been stopped by stop command)
+-   `terminated` (bool) - is conversation terminated (true if conversation was stopped by stop command)
+
+Exposed methods:
+
+-   `send_all_skippable`
+    Send all messages until sender runs into a message, which requires an answer.
+
+    Parameters:
+
+    -   `prev_answer` (str?) - answer to previous message
+
+See usage example in <a href="#quickstart">Quickstart</a>
+
+## <a id="compatibility"></a>Compatibility
+
+This library is compatible with Python>=3.6
+
+&copy; 2021 Roman Melamud
