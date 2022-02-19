@@ -1,6 +1,6 @@
 from typing import Dict, Union
-from loggers import BaseLogger
-from util_types import MessageTransferGenerator
+from pyconversation.loggers import BaseLogger
+from pyconversation.util_types import MessageTransferGenerator
 from .base import BaseMessage
 from .transfer import MessageTransfer
 
