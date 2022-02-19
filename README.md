@@ -137,7 +137,7 @@ Result: {'root.fruits': '<your answer>'}
 And one more example with decorated function (like in real chat-bots):
 
 ```python
-bot = ... # Initilaize chat bot
+bot = ... # Initialize chat bot
 
 sender = None
 
@@ -153,7 +153,7 @@ def on_connection(user_id):
 
 @bot.message
 def on_message(user_id, message):
-    sender.send_all_skippable(answer)
+    sender.send_all_skippable(message)
 
     if sender.finished:
         print("\nResult:", sender.finalize())
@@ -347,7 +347,7 @@ Constructor parameters:
 
 Usage example in upper **Creating Own Messages** section
 
-## <a id="loggers">Loggers
+## <a id="loggers"></a>Loggers
 
 Loggers are used to store users' answers and message history.
 
