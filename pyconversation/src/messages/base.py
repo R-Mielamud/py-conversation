@@ -1,5 +1,5 @@
-from pyconversation.src.loggers import BaseLogger
-from pyconversation.src.types import MessageTransferGenerator
+from loggers import BaseLogger
+from util_types import MessageTransferGenerator
 
 class BaseMessage:
 	id: str

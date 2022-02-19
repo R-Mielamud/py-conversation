@@ -1,7 +1,7 @@
 from typing import Callable, Dict, Union
-from pyconversation.src.messages import BaseMessage, MessageTransfer
-from pyconversation.src.loggers import BaseLogger
-from pyconversation.src.types import MessageTransferGenerator
+from messages import BaseMessage, MessageTransfer
+from loggers import BaseLogger
+from util_types import MessageTransferGenerator
 
 class MessageSender:
 	logger: BaseLogger
