@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Union
+from typing import Callable, List, Dict, Union
 from pyconversation.messages import BaseMessage, MessageTransfer
 from pyconversation.loggers import BaseLogger
 from pyconversation.util_types import MessageTransferGenerator
@@ -17,8 +17,8 @@ class MessageSender:
 	def __init__(
 		self,
 		*,
-		headline_text: Union[str, None],
-		stop_command: Union[str, None],
+		headline_text: Union[str, None] = None,
+		stop_command: Union[str, None] = None,
 		root: BaseMessage,
 		logger: BaseLogger,
 		send: Callable[[str], None]
@@ -55,7 +55,7 @@ class MessageSender:
 			if not self.current_message.skip:
 				break
 
-	def finalize(self) -> Dict[str, str]:
+	def finalize(self) -> Dict[str, Union[str, List[str]]]:
 		self.iterator.close()
 
 		result = self.logger.get_result_dict()

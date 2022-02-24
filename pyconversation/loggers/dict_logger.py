@@ -3,7 +3,7 @@ from .base import BaseLogger
 
 
 class DictLogger(BaseLogger):
-	result: Dict[str, str] = {}
+	result: Dict[str, Union[str, List[str]]] = {}
 	history: List[str] = []
 
 	def log(self, id: str, value: str) -> None:
