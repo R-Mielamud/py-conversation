@@ -70,23 +70,23 @@ class MessageSender:
 	def _restore(self) -> None:
 		last_id = self.logger.get_last_id()
 		self.logger.reset_history()
-		answer = None
 
 		if last_id is not None:
+			self.logger.toggle_readonly(True)
+
 			while True:
 				try:
-					self.current_message = self.iterator.send(answer)
+					self.current_message = self.iterator.send(None)
 
 					if self.current_message is None or self.current_message.id == last_id:
 						break
-
-					answer = self.logger.get(self.current_message.id)
 				except StopIteration:
 					self.finished = True
 					break
+			
+			self.logger.toggle_readonly(False)
 
 		self.resent_message = self.current_message
 
 	def _send_headline(self) -> None:
-		if self.headline:
-			self._send(self.headline)
+		self._send(self.headline)

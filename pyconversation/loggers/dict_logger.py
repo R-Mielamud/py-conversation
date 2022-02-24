@@ -3,17 +3,21 @@ from .base import BaseLogger
 
 
 class DictLogger(BaseLogger):
+	readonly: bool = False
 	result: Dict[str, Union[str, List[str]]] = {}
 	history: List[str] = []
 
 	def log(self, id: str, value: str) -> None:
-		self.result[id] = value
+		if not self.readonly:
+			self.result[id] = value
 
 	def set_array(self, id: str) -> None:
-		self.result[id] = []
+		if not self.readonly:
+			self.result[id] = []
 
 	def add_array_item(self, id: str, value: str) -> None:
-		self.result[id].append(value)
+		if not self.readonly:
+			self.result[id].append(value)
 
 	def get(self, id: str) -> Union[str, List[str], None]:
 		return self.result.get(id)
@@ -34,3 +38,6 @@ class DictLogger(BaseLogger):
 			return
 
 		return self.history[count - 1]
+
+	def toggle_readonly(self, is_readonly: bool) -> None:
+		self.readonly = is_readonly

@@ -26,5 +26,8 @@ class BaseLogger:
 	def get_last_id(self) -> Union[str, None]:
 		pass
 
+	def toggle_readonly(self, is_readonly: bool) -> None:
+		pass
+
 	def finalize(self) -> None:
 		pass

@@ -6,6 +6,7 @@ from .base import BaseLogger
 
 
 class JsonFileLogger(BaseLogger):
+	readonly: bool = False
 	path: str
 	file: TextIOWrapper
 	cache: Dict[str, Any]
@@ -26,16 +27,19 @@ class JsonFileLogger(BaseLogger):
 			self._write()
 
 	def log(self, id: str, value: str) -> None:
-		self.cache["data"][id] = value
-		self._write()
+		if not self.readonly:
+			self.cache["data"][id] = value
+			self._write()
 
 	def set_array(self, id: str) -> None:
-		self.cache["data"][id] = []
-		self._write()
+		if not self.readonly:
+			self.cache["data"][id] = []
+			self._write()
 
 	def add_array_item(self, id: str, value: str) -> None:
-		self.cache["data"][id].append(value)
-		self._write()
+		if not self.readonly:
+			self.cache["data"][id].append(value)
+			self._write()
 
 	def get(self, id: str) -> Union[str, List[str], None]:
 		return self.cache["data"].get(id)
@@ -59,6 +63,9 @@ class JsonFileLogger(BaseLogger):
 			return
 		
 		return history[count - 1]
+
+	def toggle_readonly(self, is_readonly: bool) -> None:
+		self.readonly = is_readonly
 
 	def finalize(self) -> None:
 		self.file.close()

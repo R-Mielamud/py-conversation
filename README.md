@@ -111,16 +111,16 @@ answer = None
 while True:
     # Send messages one by one, until we run into a message, which requires an answer
     # This function takes answer to previous question as a parameter
-	sender.send_all_skippable(answer)
+    sender.send_all_skippable(answer)
 
     # If all messages sent
-	if sender.finished:
+    if sender.finished:
         # Dispose of sender's resources (like open files) and get the result!
-		print("\nResult:", sender.finalize())
-		break
+        print("\nResult:", sender.finalize())
+        break
 
     # If not all messages have been sent and we still need an answer, ask!
-	answer = input()
+    answer = input()
 ```
 
 Done! If you run this, you'll get the following in the console:
@@ -405,7 +405,7 @@ It has the following abstract methods:
     -   `id` (str) - message unique id
     -   `value` (str) - value to add to list
 
--   `get` (-> union\[str, list\[str\], none\]) - get message answer or list of answers by message id if exists
+-   `get` (-> union\[str, list\[str\], None\]) - get message answer or list of answers by message id if exists
 
     Parameters:
 
@@ -431,6 +431,12 @@ And also the following virtual methods (not necessary to implement):
 
     No parameters
 
+-   `toggle_readonly` (-> None) - toggle is this logger read-only or not. If logger is readonly, it doesn't make changes to it's answers storage
+
+    Parameters:
+
+    -   `is_readonly` - is logger readonly
+
 -   `finalize` (-> None) - dispose of logger's resources (open files, socket connections, etc.)
 
     **Note**: This method is called when the conversation is finished. So, for instance, `JsonFileLogger` deletes it's data file in this method.
@@ -444,6 +450,7 @@ from typing import Union, List, Dict
 from pyconversation import BaseLogger
 
 class MySocketLogger(BaseLogger):
+    readonly: bool = False
     socket: Socket
 
     def __init__(self) -> None:
@@ -451,13 +458,16 @@ class MySocketLogger(BaseLogger):
         self._connect_socket()
 
     def log(self, id: str, value: str) -> None:
-        self.socket.emit("SET_OR_REPLACE", {"id": id, "value": value})
+        if not self.readonly:
+            self.socket.emit("SET_OR_REPLACE", {"id": id, "value": value})
 
     def set_array(self, id: str) -> None:
-        self.socket.emit("SET_OR_REPLACE", {"id": id, "value": []})
+        if not self.readonly:
+            self.socket.emit("SET_OR_REPLACE", {"id": id, "value": []})
 
     def add_array_item(self, id: str, value: str) -> None:
-        self.socket.emit("ADD_ARRAY_ITEM", {"id": id, "value": value})
+        if not self.readonly:
+            self.socket.emit("ADD_ARRAY_ITEM", {"id": id, "value": value})
 
     def get(self, id: str) -> Union[str, List[str]]:
        return self.socket.emit("GET", {"id": id})
@@ -474,6 +484,9 @@ class MySocketLogger(BaseLogger):
     def get_last_id(self, id: str) -> None:
         if not self.socket.emit("HISTORY_EMPTY"):
             return self.socket.emit("GET_LAST_IN_HISTORY")
+
+    def toggle_readonly(self, is_readonly: bool) -> None:
+        self.readonly = is_readonly
 
     def finalize(self) -> None:
         self.socket.emit("CLEAR_EVERYTHING")
