@@ -227,7 +227,7 @@ Constructor parameters:
 -   `text` (str) - question text
 -   `answer_map` (dict\[str, message\]) - dict, where key is user's answer and value is a message
 -   `fallback` (message?) - message, which'll be sent if answer doesn't match anything in `answer_map` dict
--   `repeatOnFallback` (bool?) - if true, after fallback was sent question is asked over and over again until answer matches something in `answer_map` dict
+-   `repeat_on_fallback` (bool?) - if true, after fallback was sent question is asked over and over again until answer matches something in `answer_map` dict
 
 Usage example:
 
@@ -241,7 +241,7 @@ Switch(
         "feijoa": Text(id="feijoa", text="I don't know that fruit!"),
     },
     fallback=Text(id="dont_understand", text="Sorry, I didn't understand you"),
-    repeatOnFallback=True
+    repeat_on_fallback=True
 )
 ```
 

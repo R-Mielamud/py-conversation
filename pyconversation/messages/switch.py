@@ -9,7 +9,7 @@ class Switch(BaseMessage):
 	text: str
 	answer_map: Dict[str, BaseMessage]
 	fallback: Union[BaseMessage, None]
-	repeatOnFallback: bool
+	repeat_on_fallback: bool
 
 	def __init__(
 		self,
@@ -18,13 +18,13 @@ class Switch(BaseMessage):
 		text: str,
 		answer_map: Dict[str, BaseMessage],
 		fallback: Union[BaseMessage, None] = None,
-		repeatOnFallback: bool = False
+		repeat_on_fallback: bool = False
 	) -> None:
 		super().__init__(id=id)
 		self.text = text
 		self.answer_map = answer_map
 		self.fallback = fallback
-		self.repeatOnFallback = repeatOnFallback
+		self.repeat_on_fallback = repeat_on_fallback
 
 	def _base_iterator(self, logger: BaseLogger) -> MessageTransferGenerator:
 		answer = yield MessageTransfer(id=self.id, text=self.text)
@@ -37,5 +37,5 @@ class Switch(BaseMessage):
 			if self.fallback is not None:
 				yield from self.fallback.iterator(logger)
 
-			if self.repeatOnFallback:
+			if self.repeat_on_fallback:
 				yield from self.iterator(logger)
