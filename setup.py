@@ -8,7 +8,7 @@ with open(current_dir / "README.md", "r") as readme:
 
 setuptools.setup(
 	name="pyconversation",
-	version="1.0.3",
+	version="1.0.4",
 	author="Roman Melamud",
 	description="Zero-dependency library for chat-bot creators with deadlines. It allows you to describe a conversation, talk with user according to your schema and restore it, if something went wrong.",
 	long_description=readme_text,

@@ -24,9 +24,15 @@ class ListAsk(BaseMessage):
 
 		while True:
 			count += 1
-			answer = yield MessageTransfer(id=f"{self.id}.{count}")
+			item_id = f"{self.id}.{count}"
+			answer = yield MessageTransfer(id=item_id)
 
-			if answer is None or answer.lower() == self.stop_command:
+			if answer is None:
+				break
+
+			logger.log(item_id, answer)
+
+			if answer.lower() == self.stop_command:
 				break
 
 			logger.add_array_item(self.id, answer)

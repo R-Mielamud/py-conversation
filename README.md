@@ -431,12 +431,6 @@ And also the following virtual methods (not necessary to implement):
 
     No parameters
 
--   `toggle_readonly` (-> None) - toggle is this logger read-only or not. If logger is readonly, it doesn't make changes to it's answers storage
-
-    Parameters:
-
-    -   `is_readonly` - is logger readonly
-
 -   `finalize` (-> None) - dispose of logger's resources (open files, socket connections, etc.)
 
     **Note**: This method is called when the conversation is finished. So, for instance, `JsonFileLogger` deletes it's data file in this method.
@@ -484,9 +478,6 @@ class MySocketLogger(BaseLogger):
     def get_last_id(self, id: str) -> None:
         if not self.socket.emit("HISTORY_EMPTY"):
             return self.socket.emit("GET_LAST_IN_HISTORY")
-
-    def toggle_readonly(self, is_readonly: bool) -> None:
-        self.readonly = is_readonly
 
     def finalize(self) -> None:
         self.socket.emit("CLEAR_EVERYTHING")
