@@ -9,7 +9,7 @@ class ListAsk(BaseMessage):
 	stop_command: str
 	max_count: Union[int, None]
 
-	def __init__(self, *, id: str, text: str, stop_command: str, max_count: Union[int, None]):
+	def __init__(self, *, id: str, text: str, stop_command: str, max_count: Union[int, None] = None):
 		super().__init__(id=id)
 		self.text = text
 		self.stop_command = stop_command.lower()

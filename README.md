@@ -82,7 +82,7 @@ The answer's simple - using a `MessageSender`!
 Example code:
 
 ```python
-from pyconversation import Group, Text, Ask, MessageSender
+from pyconversation import Group, Text, Ask, DictLogger, MessageSender
 
 # Conversation from step 1
 fruit_bot_conversation = Group(
@@ -444,7 +444,6 @@ from typing import Union, List, Dict
 from pyconversation import BaseLogger
 
 class MySocketLogger(BaseLogger):
-    readonly: bool = False
     socket: Socket
 
     def __init__(self) -> None:
@@ -452,16 +451,13 @@ class MySocketLogger(BaseLogger):
         self._connect_socket()
 
     def log(self, id: str, value: str) -> None:
-        if not self.readonly:
-            self.socket.emit("SET_OR_REPLACE", {"id": id, "value": value})
+        self.socket.emit("SET_OR_REPLACE", {"id": id, "value": value})
 
     def set_array(self, id: str) -> None:
-        if not self.readonly:
-            self.socket.emit("SET_OR_REPLACE", {"id": id, "value": []})
+        self.socket.emit("SET_OR_REPLACE", {"id": id, "value": []})
 
     def add_array_item(self, id: str, value: str) -> None:
-        if not self.readonly:
-            self.socket.emit("ADD_ARRAY_ITEM", {"id": id, "value": value})
+        self.socket.emit("ADD_ARRAY_ITEM", {"id": id, "value": value})
 
     def get(self, id: str) -> Union[str, List[str]]:
        return self.socket.emit("GET", {"id": id})
@@ -470,12 +466,12 @@ class MySocketLogger(BaseLogger):
         return self.socket.emit("GET_ALL")
 
     def reset_history(self) -> None:
-        return self.socket.emit("SET_HISTORY", [])
+        self.socket.emit("SET_HISTORY", [])
 
     def log_last_id(self, id: str) -> None:
-        return self.socket.emit("ADD_HISTORY", id)
+        self.socket.emit("ADD_HISTORY", id)
 
-    def get_last_id(self, id: str) -> None:
+    def get_last_id(self, id: str) -> Union[str, None]:
         if not self.socket.emit("HISTORY_EMPTY"):
             return self.socket.emit("GET_LAST_IN_HISTORY")
 
